@@ -2,6 +2,7 @@ package com.yourorganization.maven_sample;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseException;
+import com.github.javaparser.ParseResult;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.stmt.IfStmt;
@@ -11,39 +12,55 @@ import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.utils.CodeGenerationUtils;
 import com.github.javaparser.utils.SourceRoot;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Some code that uses JavaParser.
  */
 public class LogicPositivizer {
     public static void main(String[] args) throws IOException {
-        // SourceRoot is a tool that read and writes Java files from packages on a certain root directory.
-        // In this case the root directory is found by taking the root from the current Maven module,
-        // with src/main/resources appended.
-        SourceRoot sourceRoot = new SourceRoot(CodeGenerationUtils.mavenModuleRoot(LogicPositivizer.class).resolve("src/main/resources"));
+
+        File[] directories = new File("E:\\java projects").listFiles(File::isDirectory);
+        for (File file:directories
+             ) {
+            FolderParser folderParser = new FolderParser(file.toPath());
+            folderParser.getAllJavaFiles();
+            folderParser.createCus();
+        }
 
 
-        // Our sample is in the root of this directory, so no package name.
-        CompilationUnit cu = sourceRoot.parse("", "SumOfPerimeters.java");
-        //SourceRoot sourceRoot = new SourceRoot(Paths.get("E:\\Refactor-tests"));
-        //CompilationUnit cu = sourceRoot.parse("", "");
-        ClassVisitor classVIsitor = new ClassVisitor();
-        cu.accept(classVIsitor, null);
+        /*
+        FolderParser folderParser = new FolderParser(Paths.get("E:\\Refactor-tests"));
+        folderParser.getAllJavaFiles();
+        folderParser.createCus();
 
 
-        // This saves all the files we just read to an output directory.  
-        //saveChanges(sourceRoot);
+         */
+        /*
+        Set<String> set1 = new HashSet<String>();
+        set1.add("a");
+        set1.add("b");
+        set1.add("c");
+        Set<String> set2 = new HashSet<String>();
+        set1.add("a");
+        set1.add("d");
+        set1.add("e");
+
+        Set<String> result = new HashSet<>(set1);
+        result.addAll(set2);
+        System.out.println(set1);*/
     }
 
-    private static void saveChanges(SourceRoot sourceRoot) {
-        sourceRoot.saveAll(
-                // The path of the Maven module/project which contains the LogicPositivizer class.
-                CodeGenerationUtils.mavenModuleRoot(LogicPositivizer.class)
-                        // appended with a path to "output"
-                        .resolve(Paths.get("output")));
-    }
+
 }
